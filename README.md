@@ -1,309 +1,184 @@
 mocha   运行test文件夹中的内容
 mocha demo1/calcu.test.js 测试demo1文件中的内容
 
-作为一个项目而言，单元测试应该是必备的一部分，也是最容易被大家忽略的一部分，这篇文章就介绍一下mocha这个测试框架的用法。
 
 
+### DETECTS MULTIPLE CALLS TO DONE()
+If you use callback-based async tests, Mocha will throw an error if done() is called multiple times. This is handy for catching accidental double callbacks.
 
-###### 一、环境搭建
-首先先全局安装mocha
+检测多个调用完成()
+如果done() 被多次调用,如果您使用基于callback的异步测试，Mocha将会抛出一个错误。这对于捕捉意外的双回调非常方便。
 
+### ASSERTIONS
+Mocha allows you to use any assertion library you wish. In the above example, we’re using Node.js’ built-in assert module–but generally, if it throws an Error, it will work! This means you can use libraries such as:
 
-    npm i mocha -g
-		
-###### 二、 简单测试脚本书写
+断言
+Mocha允许您使用任何您希望的断言库。在上面的例子中，我们使用node.js的内置assert模块，但一般来说，如果它抛出一个错误，它将会起作用!这意味着您可以使用诸如:
 
-1、新建  calcu.js
-```
-//add
-exports.add = (a,b) => {
-	return a + b
-}
-```
-2、新建测试脚本 calcu.test.js，一般命名规则测试脚本和原脚本同名，但是后缀名为.test.js
-```
-let calcu = require('./calcu');
-let should = require("should");
+should.js - BDD style shown throughout these docs
+expect.js - expect() style assertions
+chai - expect(), assert() and should-style assertions
+better-assert - C-style self-documenting assert()
+unexpected - “the extensible BDD assertion toolkit”
 
-describe("add func test",() => {
-    it('2 add 2 should equal 4',() => {
-      calcu.add(2,2).should.equal(4)
-    })
-})
-```
-这一段代码就是测试脚本，可以独立运行，使用命令
-```
-mocha demo1/mocha demo1/calcu.test.js
-```
-describe 表示测试套件，是一序列相关程序的测试
+ASYNCHRONOUS CODE
+Testing asynchronous code with Mocha could not be simpler! Simply invoke the callback when your test is complete. By adding a callback (usually named done) to it(), Mocha will know that it should wait for this function to be called to complete the test. This callback accepts both an Error instance (or subclass thereof) or a falsy value; anything else will cause a failed test.
 
-it表示单元测试(unit test)，也就是测试的最小单位。
+异步代码
+使用Mocha测试异步代码很简单!当测试完成时，只需调用回调。通过在it()中添加一个回调(通常称为done)， Mocha将知道它应该等待调用这个函数来完成测试。这个回调接受一个错误实例(或其子类)或一个假值;否则将导致测试失败。
 
-###### 三、断言库简介
+WORKING WITH PROMISES
+Alternately, instead of using the done() callback, you may return a Promise. This is useful if the APIs you are testing return promises instead of taking callbacks:
 
-断言库可以理解为比较函数，也就是断言函数是否和预期一致，如果一致则表示测试通过，如果不一致表示测试黑失败，一个unit test里面可以包含多个断言语句。
+有PROMISES
+另外，您可以返回一个PROMISES，而不是使用done()回调。如果您正在测试的api返回PROMISES而不是回调，那么这将非常有用。
 
-本身mocha是不包含断言库的，所以必须引入第三方断言库，目前比较受欢迎的断言库  有 should.js、expect.js 、chai，具体的语法规则需要大家去查阅相关文档。
+In Mocha v3.0.0 and newer, returning a Promise and calling done() will result in an exception, as this is generally a mistake:
 
-因为chai既包含should、expect和assert三种风格，可扩展性比较强。
-下面简单的介绍一下这是那种风格
+在Mocha v3.0.0和更新中，返回一个承诺并调用done()将导致异常，因为这通常是一个错误:
 
-should
-```
-let num = 4+5
-num.should.equal(9);
-num.should.not.equal(10);
+USING ASYNC / AWAIT
+If your JS environment supports async / await you can also write asynchronous tests like this:
 
-//boolean
-'ok'.should.to.be.ok;
-false.should.to.not.be.ok;
+使用异步/等待
+如果您的JS环境支持异步/等待，您也可以编写这样的异步测试:
 
-//type
-'test'.should.to.be.a('string');
-({ foo: 'bar' }).should.to.be.an('object');
-```
+SYNCHRONOUS CODE
+When testing synchronous code, omit the callback and Mocha will automatically continue on to the next test.
 
-expect
-```
-let expect = require("chai").expect;
+同步代码
+在测试同步代码时，忽略回调，Mocha将自动继续进行下一次测试。
 
+ARROW FUNCTIONS
+Passing arrow functions (“lambdas”) to Mocha is discouraged. Lambdas lexically bind this and cannot access the Mocha context. For example, the following code will fail:
 
-// equal or no equal
-let num = 4+5
-expect(num).equal(9);
-expect(num).not.equal(10);
+箭头功能
+传递箭头函数(“lambdas”)到Mocha是不鼓励的。Lambdas将此绑定，不能访问Mocha上下文。例如，以下代码将失败:
 
-//boolean
-expect('ok').to.be.ok;
-expect(false).to.not.be.ok;
+HOOKS
+With its default “BDD”-style interface, Mocha provides the hooks before(), after(), beforeEach(), and afterEach(). These should be used to set up preconditions and clean up after your tests.
 
-//type
-expect('test').to.be.a('string');
-expect({ foo: 'bar' }).to.be.an('object');
-```
-assert
-```
-let assert = require("chai").assert;
+钩子
+使用默认的“BDD”样式接口，Mocha提供了钩子before()、after()、before each()和afterEach()之前。这些应该用于设置先决条件，并在测试后进行清理。
 
+  ```
+    describe('hooks', function() {
 
-// equal or no equal
-let num = 4+5
-assert.equal(num,9);
-
-//type
-assert.typeOf('test', 'string', 'test is a string');
-```
-
-###### 四、mocha用法详解
-
-平时长写的测试类型一共三种
-- 常规函数测试
-- 异步函数测试
-- api测试
-
-4.1、常规函数
-***
-
-测试就如我们上面写的第一个测试用例
-
-4.2 异步函数测试
-***
-新建文件book.js
-```
-let fs = require('fs');
-
-exports.read = (cb) => {
-        fs.readFile('./book.txt', 'utf-8', (err, result) => {
-            if (err) return cb(err);
-            console.log("result",result);
-            cb(null, result);
-        }) 
-}
-
-
-```
-
-新建文件book.test.js
-```
-let book = require('./book');
-let expect = require("chai").expect;
-
-let book = require('./book');
-let expect = require("chai").expect;
-
-describe("async", () => {
-  it('read book async', function (done) {
-    book.read((err, result) => {
-      expect(err).equal(null);
-      expect(result).to.be.a('string');
-      done();
-    })
-  })
-})
-
-```
-运行mocha book.test.js,我们会发现成功了，但是如果我们把book.js增加一个定时函数，改为如下例子
-```
-let fs = require('fs');
-
-exports.read = (cb) => {
-    setTimeout(function() {
-        fs.readFile('./book.txt', 'utf-8', (err, result) => {
-            if (err) return cb(err);
-            console.log("result",result);
-            cb(null, result);
-        }) 
-    }, 3000);
-}
-
-```
-会发现报如下错误
-
-    Timeout of 2000ms exceeded.
-
-这是因为mocha默认每个测试用例最多执行2000毫秒，如果到时没有得到结果，就报错。所以我们在进行异步操作的时候，需要额外指定timeout时间
-    
-	mocha --timeout 5000 book.test.js
-这样就保证测试用例成功
-
-4.3、api测试
-***
-api测试需要用到一个的是模块 supertest，安装这个模块。
-
-    npm i supertest --save-dev
-		
-新建文件api.test.js
-```
-let expect = require("chai").expect;
-let request = require('supertest');
-
-describe("api", () => {
-  it('get baidu information', function (done) {
-    request('https://www.baidu.com')
-      .get('/')
-      .expect(200)
-      .expect('Content-Type', /html/)
-      .end(function (err, res) {
-        expect(res).to.be.an('object');
-        done();
+      before(function() {
+        // runs before all tests in this block
       });
-  })
-})
 
-```
-
-###### 五、命令行参数详解
-
-5.1、--reporter :用来指定报告的格式
-***
-    mocha --reporter spec
-默认报告格式spec,我个人比较喜欢的网页格式是
-[mochawesome](http://adamgruber.github.io/mochawesome/),
-需要手动安装 
-
-    npm i mochawesome --save-dev
-    ./node_modules/.bin/mocha ./demo*/*.test.js -t 5000 --reporter mochawesome
-	 
--t 5000是因为我们测试用例中有一个异步执行过程，需要调高mocha的单元测试时间
-
-5.2、--watch :参数用来监视指定的测试脚本。只要测试脚本有变化
-
-5.3、--bail：参数指定只要有一个测试用例没有通过，就停止执行后面的测试用例
-
-5.4、--grep：参数用来搜索单元测试用例的名称,然后运行符合搜索条件的测试用例,支持正则表达
-***
-    mocha --grep /2/   ./demo*/*.test.js
-5.5、--invert：参数表示只运行不符合条件的测试脚本，必须与--grep参数配合使用。
-5.6 --recursive
-***
-一般如果运行mocha，会执行当前目录下的test目录的一级层级的所有js文件，但是test下的更多层级却没办法运行，这时就需要参数--recursive，这时test子目录下面所有的测试用例----不管在哪一层----都会执行。
-
-###### 六、配置文件mocha.opts的配置
-***
-每次我们运行测试用例的时候都需要写很长一段命令行，每次都一样，这样是不可取的，所以我们可以把这些配置维护到配置文件里面。
-
-Mocha允许在test目录下面，放置配置文件mocha.opts，新建test文件夹，放置以下文件
-api.test.js
-```
-let expect = require("chai").expect;
-let request = require('supertest');
-
-describe("api", () => {
-  it('get baidu information', function (done) {
-    request('https://www.baidu.com')
-      .get('/')
-      .expect(200)
-      .expect('Content-Type', /html/)
-      .end(function (err, res) {
-        expect(res).to.be.an('object');
-        done();
+      after(function() {
+        // runs after all tests in this block
       });
-  })
-})
 
-```
+      beforeEach(function() {
+        // runs before each test in this block
+      });
 
-运行
+      afterEach(function() {
+        // runs after each test in this block
+      });
 
-     mocha --reporter tap 
-
-然后在test下建mocha.opts
-
-	 // mocha.opts
-	 ```
-	 --reporter tap 
-	 ```
-	 
-运行mocha，得到和上面一样的结果
-	 
-
-  
-
-###### 七、mocha的生命钩子
-***
-mocha一共四个生命钩子
-before()：在该区块的所有测试用例之前执行
-after()：在该区块的所有测试用例之后执行
-beforeEach()：在每个单元测试前执行
-和afterEach()：在每个单元测试后执行
-
-```
-describe('hooks', function () {
-    let i = 1
-    let j = 1
-    let m = 1
-    let n = 1
-    before(function () {
-        console.log("the " + i++ + " start")
+      // test cases
     });
 
-    after(function () {
-        console.log("the " + j++ + " end")
-    });
+  ```
 
-    beforeEach(function () {
-        console.log("the " + m++ + " start")
-    });
+  Tests can appear before, after, or interspersed with your hooks. Hooks will run in the order they are defined, as appropriate; all before() hooks run (once), then any beforeEach() hooks, tests, any afterEach() hooks, and finally after() hooks (once).
 
-    afterEach(function () {
-        console.log("the " + n++ + " start")
-    });
+  测试可以出现在您的钩子之前、之后或穿插。钩子将按照它们被定义的顺序运行;所有before()钩子运行(一次)，然后在每个beforeEach()钩子、测试、任何afterEach()钩子上，最后在after()钩子(一次)。
 
-    it('one', function (done) {
-        done()
-    })
-    it('two', function (done) {
-        done()
-    })
-});
-```
+  DESCRIBING HOOKS
+Any hook can be invoked with an optional description, making it easier to pinpoint errors in your tests. If a hook is given a named function, that name will be used if no description is supplied.
 
-		
+描述钩子
+任何钩子都可以用一个可选的描述来调用，这样可以更容易地查明测试中的错误。如果一个钩子被赋予一个指定的函数，如果没有提供描述，这个名称将被使用。
 
+ROOT-LEVEL HOOKS
+You may also pick any file and add “root”-level hooks. For example, add beforeEach() outside of all describe() blocks. This will cause the callback to beforeEach() to run before any test case, regardless of the file it lives in (this is because Mocha has an implied describe() block, called the “root suite”).
 
+根级钩子
+您还可以选择任何文件并添加“根”级挂钩。例如，在所有描述()块之外添加beforeEach()。这将导致在每个测试用例之前运行回调()，而不考虑它所驻留的文件(这是因为Mocha有一个隐含的描述()块，称为“根套件”)。
 
+DELAYED ROOT SUITE
+If you need to perform asynchronous operations before any of your suites are run, you may delay the root suite. Run mocha with the --delay flag. This will attach a special callback function, run(), to the global context:
 
+推迟根套件
+如果您需要在运行任何一个套件之前执行异步操作，您可以延迟根套件。用“延迟标志”运行摩卡。这将在全局上下文中附加一个特殊的回调函数run():
 
+PENDING TESTS
+“Pending”–as in “someone should write these test cases eventually”–test-cases are simply those without a callback:
 
+PENDING TESTS
+“待定”-就像在“某人应该写这些测试用例”- - -测试用例只是没有回调的那些:
 
+EXCLUSIVE TESTS
+The exclusivity feature allows you to run only the specified suite or test-case by appending .only() to the function. Here’s an example of executing only a particular suite:
 
+独家测试
+独占特性允许您只通过附加.only()来运行指定的套件或测试用例。这里有一个仅执行特定套件的示例:
+
+INCLUSIVE TESTS
+This feature is the inverse of .only(). By appending .skip(), you may tell Mocha to simply ignore these suite(s) and test case(s). Anything skipped will be marked as pending, and reported as such. Here’s an example of skipping an entire suite:
+
+包容性测试
+该特性是.only()的倒数。通过附加.skip()，您可以告诉Mocha简单地忽略这些套件和测试用例。任何跳过的内容将被标记为pending，并报告为这样。这里有一个跳过一整套的例子:
+
+RETRY TESTS
+You can choose to retry failed tests up to a certain number of times. This feature is designed to handle end-to-end tests (functional tests/Selenium…) where resources cannot be easily mocked/stubbed. It’s not recommended to use this feature for unit tests.
+
+This feature does re-run beforeEach/afterEach hooks but not before/after hooks.
+
+重试测试
+您可以选择重试失败的测试到一定次数。这个功能是为了处理端到端测试(功能测试/硒…)在资源无法轻易 mocked/stubbed。不建议在单元测试中使用此特性。
+
+这个特性在beforeEach/afterEach都要重新运行，而不是before/after。
+
+DYNAMICALLY GENERATING TESTS
+Given Mocha’s use of Function.prototype.call and function expressions to define suites and test cases, it’s straightforward to generate your tests dynamically. No special syntax is required — plain ol’ JavaScript can be used to achieve functionality similar to “parameterized” tests, which you may have seen in other frameworks.
+
+动态生成测试
+提供了Mocha的功能原型。调用和函数表达式来定义套件和测试用例，很容易动态地生成测试。不需要特殊的语法——plain ol的JavaScript可用于实现类似于“参数化”测试的功能，您可以在其他框架中看到这些测试。
+
+TEST DURATION
+Many reporters will display test duration, as well as flagging tests that are slow, as shown here with the “spec” reporter:
+
+测试持续时间
+许多记者将会显示测试持续时间，以及缓慢的测试，如这里所示的“规格”记者:
+
+DIFFS
+Mocha supports the err.expected and err.actual properties of any thrown AssertionErrors from an assertion library. Mocha will attempt to display the difference between what was expected, and what the assertion actually saw. Here’s an example of a “string” diff:
+
+差别
+Mocha支持犯错。预期,犯错。任何从断言库中抛出的断言错误的实际属性。Mocha将尝试显示所期望的和断言实际看到的差异。这里有一个“string”diff的例子:
+
+INTERFACES
+Mocha’s “interface” system allows developers to choose their style of DSL. Mocha has BDD, TDD, Exports, QUnit and Require-style interfaces.
+
+接口
+Mocha的“界面”系统允许开发者选择他们的DSL风格。Mocha有BDD、TDD、Exports、QUnit和requirestyle接口。
+
+BDD
+The BDD interface provides describe(), context(), it(), specify(), before(), after(), beforeEach(), and afterEach().
+
+context() is just an alias for describe(), and behaves the same way; it just provides a way to keep tests easier to read and organized. Similarly, specify() is an alias for it().
+
+BDD
+BDD接口提供了describe(), context(), it(), specify(), before(), after(), beforeEach(), and afterEach()。
+
+context()只是describe()的别名，并且行为相同;它只是提供了一种让测试更容易阅读和组织的方法。类似地，specify()是it()的别名。
+
+TDD
+The TDD interface provides suite(), test(), suiteSetup(), suiteTeardown(), setup(), and teardown():
+
+EXPORTS
+The Exports interface is much like Mocha’s predecessor expresso. The keys before, after, beforeEach, and afterEach are special-cased, object values are suites, and function values are test-cases:
+
+QUNIT
+The QUnit-inspired interface matches the “flat” look of QUnit, where the test suite title is simply defined before the test-cases. Like TDD, it uses suite() and test(), but resembling BDD, it also contains before(), after(), beforeEach(), and afterEach().
+
+REQUIRE
+The require interface allows you to require the describe and friend words directly using require and call them whatever you want. This interface is also useful if you want to avoid global variables in your tests.
+
+Note: The require interface cannot be run via the node executable, and must be run via mocha.
